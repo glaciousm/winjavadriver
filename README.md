@@ -36,7 +36,7 @@ A Windows desktop automation tool that implements the W3C WebDriver protocol. Au
 <dependency>
     <groupId>io.github.winjavadriver</groupId>
     <artifactId>winjavadriver-client</artifactId>
-    <version>0.1.0</version>
+    <version>1.0.0</version>
 </dependency>
 ```
 

@@ -6,7 +6,7 @@
 
     <groupId>io.github.winjavadriver</groupId>
     <artifactId>winjavadriver-client</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>WinJavaDriver Client</name>
