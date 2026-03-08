@@ -36,7 +36,7 @@ A Windows desktop automation tool that implements the W3C WebDriver protocol. Au
 
 ```xml
 <dependency>
-    <groupId>io.github.winjavadriver</groupId>
+    <groupId>io.github.glaciousm</groupId>
     <artifactId>winjavadriver-client</artifactId>
     <version>1.0.0</version>
 </dependency>
@@ -45,7 +45,7 @@ A Windows desktop automation tool that implements the W3C WebDriver protocol. Au
 ### Basic Usage
 
 ```java
-import io.github.winjavadriver.*;
+import io.github.glaciousm.*;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.OutputType;
 
@@ -170,7 +170,7 @@ Click **Replay** to re-execute recorded steps against the live application:
 ### WinJavaDriver (extends Selenium's RemoteWebDriver)
 
 ```java
-import io.github.winjavadriver.*;
+import io.github.glaciousm.*;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.*;
 

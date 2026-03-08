@@ -4,9 +4,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.github.winjavadriver.tests</groupId>
+    <groupId>io.github.glaciousm.tests</groupId>
     <artifactId>calculator-tests</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
 
     <name>Calculator Automation Tests</name>
@@ -29,9 +29,9 @@
     <dependencies>
         <!-- WinJavaDriver Client -->
         <dependency>
-            <groupId>io.github.winjavadriver</groupId>
+            <groupId>io.github.glaciousm</groupId>
             <artifactId>winjavadriver-client</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>1.0.0</version>
         </dependency>
 
         <!-- Selenium (transitive from winjavadriver-client, explicit for IDE resolution) -->
