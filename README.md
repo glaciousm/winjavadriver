@@ -31,8 +31,7 @@ A Windows desktop automation tool that implements the W3C WebDriver protocol. Au
 
 ### Installation
 
-1. Download the latest `winjavadriver.exe` from [Releases](https://github.com/glaciousm/winjavadriver/releases)
-2. Add the Java client to your project:
+1. Add the Java client to your project — the server binary is **auto-downloaded** on first run:
 
 ```xml
 <dependency>
