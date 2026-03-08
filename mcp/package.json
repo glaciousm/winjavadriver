@@ -1,5 +1,5 @@
 {
-  "name": "@winjavadriver/mcp-server",
+  "name": "winjavadriver-mcp",
   "version": "1.0.0",
   "description": "MCP server for Windows desktop automation via WinJavaDriver",
   "type": "module",
@@ -10,8 +10,30 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "tsx src/index.ts"
+    "dev": "tsx src/index.ts",
+    "prepublishOnly": "npm run build"
   },
+  "keywords": [
+    "mcp",
+    "windows",
+    "desktop-automation",
+    "ui-automation",
+    "webdriver",
+    "winjavadriver",
+    "model-context-protocol"
+  ],
+  "author": "Menelaos Mamouzellos",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/glaciousm/winjavadriver.git",
+    "directory": "mcp"
+  },
+  "homepage": "https://github.com/glaciousm/winjavadriver#mcp-server-ai-desktop-automation",
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.27.0"
   },
