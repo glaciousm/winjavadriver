@@ -7,6 +7,7 @@ on:
       - 'docs/**'
       - 'README.md'
       - '.github/workflows/pages.yml'
+      - '_config.yml'
 
 permissions:
   contents: read
@@ -29,12 +30,11 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
-      - name: Build docs site
-        run: |
-          mkdir -p _site
-          cp README.md _site/index.md
-          cp -r docs/* _site/
-          cp LICENSE _site/
+      - name: Build with Jekyll
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./
+          destination: ./_site
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

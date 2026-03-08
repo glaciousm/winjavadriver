@@ -1,0 +1,24 @@
+title: WinJavaDriver
+description: Windows desktop automation via W3C WebDriver protocol
+theme: jekyll-theme-cayman
+plugins:
+  - jekyll-relative-links
+
+relative_links:
+  enabled: true
+  collections: true
+
+include:
+  - docs
+
+exclude:
+  - client-java
+  - mcp
+  - examples
+  - configs
+  - scripts
+  - jenkins
+  - node_modules
+  - "*.json"
+  - "*.xml"
+  - "*.toml"
