@@ -1,0 +1,14 @@
+services:
+  jenkins:
+    build: .
+    container_name: winjavadriver-jenkins
+    ports:
+      - "8888:8080"
+    volumes:
+      - jenkins_data:/var/jenkins_home
+      - ./../:/mnt/winjavadriver:ro    # Mount repo root — adjust path as needed
+    extra_hosts:
+      - "grid-node:YOUR_GRID_NODE_IP"  # Replace with your Grid node's IP
+
+volumes:
+  jenkins_data:

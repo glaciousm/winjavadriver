@@ -1,0 +1,26 @@
+{
+  "name": "@winjavadriver/mcp-server",
+  "version": "0.1.0",
+  "description": "MCP server for Windows desktop automation via WinJavaDriver",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "winjavadriver-mcp": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.27.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

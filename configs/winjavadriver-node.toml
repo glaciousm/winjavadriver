@@ -1,0 +1,32 @@
+# Selenium Grid 4 Node configuration for WinJavaDriver relay.
+#
+# This configures a Selenium Grid Node to relay WebDriver commands
+# to a locally running winjavadriver.exe instance.
+#
+# Usage:
+#   1. Start winjavadriver.exe:
+#        winjavadriver.exe --port 9515
+#
+#   2. Start this node (pointing to your Grid Hub):
+#        java -jar selenium-server.jar --node --config winjavadriver-node.toml
+#
+#   3. The node registers with the Hub and appears in the Grid UI.
+#      Tests requesting platformName=windows + browserName=winjavadriver
+#      will be routed to this node.
+
+[server]
+port = 5555
+
+[node]
+detect-drivers = false
+# Uncomment and set to your Grid Hub URL:
+# grid-url = "http://hub-machine:4444"
+
+[relay]
+url = "http://localhost:9515"
+status-endpoint = "/status"
+# Format: "maxSessions", "{capability JSON}"
+# Max 1 concurrent session (desktop automation is single-session per machine)
+configs = [
+  "1", "{\"platformName\": \"windows\", \"browserName\": \"winjavadriver\"}"
+]

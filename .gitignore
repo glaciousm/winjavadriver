@@ -1,0 +1,25 @@
+# Java / Maven
+**/target/
+
+# Node.js
+node_modules/
+dist/
+
+# IDE
+.idea/
+*.suo
+*.user
+*.sln.docstates
+.vs/
+.vscode/
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Logs
+*.log
+
+# Tools (downloaded binaries)
+tools/

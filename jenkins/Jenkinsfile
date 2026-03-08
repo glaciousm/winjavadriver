@@ -1,0 +1,44 @@
+pipeline {
+    agent any
+    environment {
+        GRID_URL = 'http://grid-node:4444'
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                // For CI: clone from SCM
+                // git url: 'https://github.com/glaciousm/winjavadriver.git', branch: 'main'
+                //
+                // For local Docker testing: copy from mounted volume
+                sh 'cp -r /mnt/winjavadriver/client-java .'
+                sh 'cp -r /mnt/winjavadriver/examples .'
+            }
+        }
+        stage('Build Client') {
+            steps {
+                dir('client-java') {
+                    sh 'mvn clean install -DskipTests'
+                }
+            }
+        }
+        stage('Desktop UI Tests via Grid') {
+            steps {
+                dir('examples/calculator-tests') {
+                    sh """mvn test \
+                        -Dwinjavadriver.grid.url=${GRID_URL} \
+                        -Dcucumber.filter.tags='@Modern and not @Combo'"""
+                }
+            }
+            post {
+                always {
+                    junit testResults: '**/target/surefire-reports/*.xml', allowEmptyResults: true
+                }
+            }
+        }
+    }
+    post {
+        always {
+            cleanWs()
+        }
+    }
+}
