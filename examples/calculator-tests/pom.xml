@@ -31,7 +31,7 @@
         <dependency>
             <groupId>io.github.glaciousm</groupId>
             <artifactId>winjavadriver-client</artifactId>
-            <version>1.0.1</version>
+            <version>1.0.3</version>
         </dependency>
 
         <!-- Selenium (transitive from winjavadriver-client, explicit for IDE resolution) -->
