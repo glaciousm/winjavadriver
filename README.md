@@ -19,6 +19,8 @@ A Windows desktop automation tool that implements the W3C WebDriver protocol. Au
 - **Multiple Locator Strategies** — name, accessibilityId, className, tagName, xpath
 - **Name Normalization** — `WinBy.name("Open")` automatically matches both `"Open"` and `"&Open"` (Windows accelerator key prefix)
 - **Window Chaining** — `switchTo().window(handle)` tracks previous window, `switchBack()` returns to it
+- **System Window Discovery** — `listAllWindows()` enumerates all visible windows; `switchToWindowByTitle()` switches by title fragment
+- **Convenience API** — Wait helpers, element indexing, child enumeration, position-based lookup, retry, and global `sendKeys()`
 - **Screenshots** — Window, element, and full desktop screenshot capture (z-order independent)
 - **Selenium Grid 4 Integration** — Run tests on remote Windows machines via Grid relay
 - **Cucumber/BDD Ready** — Example projects for Calculator automation
@@ -198,6 +200,33 @@ driver.manage().window().maximize();
 driver.switchTo().window(popupHandle).findElement(WinBy.name("OK")).click();
 driver.switchBack();
 
+// Switch to a window by title (searches all system windows, not just current process)
+driver.switchToWindowByTitle("POS_PREPROD");
+
+// List all visible windows on the system (handle, title, className, processId)
+List<Map<String, Object>> windows = driver.listAllWindows();
+
+// Wait helpers (default 10s timeout, or provide custom Duration)
+WebElement el = driver.waitForElement(WinBy.name("Ready"));
+WebElement btn = driver.waitForClickable(WinBy.name("Save"), Duration.ofSeconds(5));
+Set<String> handles = driver.waitForWindowCount(2);
+
+// Send keys to focused element (no element reference needed)
+driver.sendKeys(Keys.chord(Keys.CONTROL, "o")); // Ctrl+O
+
+// Find element by index (useful for VB6 controls without unique identifiers)
+WebElement thirdButton = driver.findElementByIndex(WinBy.className("Button"), 2);
+
+// Find element by visual grid position (row, col — groups by Y, sorts by X)
+WebElement cell = driver.findElementByPosition(WinBy.className("ThunderRT6TextBox"), 1, 3);
+
+// Get direct children of an element (works with UIA and Win32/VB6)
+List<WebElement> children = driver.findChildren(parentElement);
+WebElement firstChild = driver.findChildren(parentElement, 0);
+
+// Retry flaky interactions
+driver.retry(() -> driver.findElement(WinBy.name("Save")).click(), 3, Duration.ofMillis(500));
+
 // Screenshots (Selenium standard — captures app window)
 File screenshot = driver.getScreenshotAs(OutputType.FILE);
 
@@ -326,16 +355,19 @@ List<WebElement> labels = driver.findElements(WinBy.className("VB6Label"));
 labels.forEach(l -> System.out.println(l.getText()));  // runtime captions
 ```
 
-### MSFlexGrid Cell Automation
+### Custom Server Endpoints
 
-VB6 MSFlexGrid doesn't expose individual cells as accessible elements. WinJavaDriver provides custom endpoints for cell-level access:
+WinJavaDriver extends the W3C WebDriver protocol with custom endpoints:
 
 | Method | Endpoint | Purpose |
 |--------|----------|---------|
-| POST | `/session/{id}/winjavadriver/grid/{eid}/cell` | Create virtual cell element (row, col) |
+| GET | `/session/{id}/winjavadriver/element/{eid}/children` | Get direct children (UIA + Win32/VB6) |
+| GET | `/session/{id}/winjavadriver/windows/all` | List all visible windows on the system |
+| GET | `/session/{id}/winjavadriver/screenshot/desktop` | Full desktop screenshot |
+| POST | `/session/{id}/winjavadriver/grid/{eid}/cell` | Create virtual MSFlexGrid cell element |
 | GET | `/session/{id}/winjavadriver/grid/{eid}/info` | Get grid dimensions and edit field info |
-| POST | `/session/{id}/winjavadriver/grid/{eid}/cell/value` | Read cell value |
-| PUT | `/session/{id}/winjavadriver/grid/{eid}/cell/value` | Write cell value |
+| POST | `/session/{id}/winjavadriver/grid/{eid}/cell/value` | Read MSFlexGrid cell value |
+| PUT | `/session/{id}/winjavadriver/grid/{eid}/cell/value` | Write MSFlexGrid cell value |
 
 - Row/col are 0-based (excluding header row)
 - The MCP server exposes this via `win_grid_edit` for batch cell editing

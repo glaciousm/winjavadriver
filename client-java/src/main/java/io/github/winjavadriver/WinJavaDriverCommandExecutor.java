@@ -25,6 +25,12 @@ class WinJavaDriverCommandExecutor extends DriverCommandExecutor {
     // Desktop screenshot command
     static final String WIN_DESKTOP_SCREENSHOT = "winjavadriver:desktopScreenshot";
 
+    // Element children command
+    static final String WIN_ELEMENT_CHILDREN = "winjavadriver:elementChildren";
+
+    // Window enumeration command
+    static final String WIN_LIST_ALL_WINDOWS = "winjavadriver:listAllWindows";
+
     // MSFlexGrid extension commands
     static final String WIN_GRID_CELL = "winjavadriver:gridCell";
     static final String WIN_GRID_GET_VALUE = "winjavadriver:gridGetValue";
@@ -48,6 +54,14 @@ class WinJavaDriverCommandExecutor extends DriverCommandExecutor {
         // Desktop screenshot command
         defineCommand(WIN_DESKTOP_SCREENSHOT,
                 new CommandInfo("/session/:sessionId/winjavadriver/screenshot/desktop", HttpMethod.GET));
+
+        // Element children command
+        defineCommand(WIN_ELEMENT_CHILDREN,
+                new CommandInfo("/session/:sessionId/winjavadriver/element/:elementId/children", HttpMethod.GET));
+
+        // Window enumeration command
+        defineCommand(WIN_LIST_ALL_WINDOWS,
+                new CommandInfo("/session/:sessionId/winjavadriver/windows/all", HttpMethod.GET));
 
         // MSFlexGrid extension commands
         defineCommand(WIN_GRID_CELL,
@@ -78,6 +92,14 @@ class WinJavaDriverCommandExecutor extends DriverCommandExecutor {
             // Desktop screenshot command
             defineCommand(WIN_DESKTOP_SCREENSHOT,
                     new CommandInfo("/session/:sessionId/winjavadriver/screenshot/desktop", HttpMethod.GET));
+
+            // Element children command
+            defineCommand(WIN_ELEMENT_CHILDREN,
+                    new CommandInfo("/session/:sessionId/winjavadriver/element/:elementId/children", HttpMethod.GET));
+
+            // Window enumeration command
+            defineCommand(WIN_LIST_ALL_WINDOWS,
+                    new CommandInfo("/session/:sessionId/winjavadriver/windows/all", HttpMethod.GET));
 
             // MSFlexGrid extension commands
             defineCommand(WIN_GRID_CELL,
