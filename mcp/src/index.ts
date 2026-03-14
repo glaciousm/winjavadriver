@@ -17,7 +17,7 @@ import { registerSmartTools } from "./tools/smart-tools.js";
 // Create MCP server
 const server = new McpServer({
   name: "winjavadriver",
-  version: "1.0.4",
+  version: "1.1.0",
 });
 
 // Create driver manager and WebDriver HTTP client

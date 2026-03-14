@@ -40,7 +40,7 @@ A Windows desktop automation tool that implements the W3C WebDriver protocol. Au
 <dependency>
     <groupId>io.github.glaciousm</groupId>
     <artifactId>winjavadriver-client</artifactId>
-    <version>1.0.4</version>
+    <version>1.1.0</version>
 </dependency>
 ```
 
