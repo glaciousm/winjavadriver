@@ -186,61 +186,90 @@ WinJavaDriver driver = new WinJavaDriver(new URL("http://localhost:9515"), optio
 WebElement element = driver.findElement(WinBy.name("Save"));
 List<WebElement> elements = driver.findElements(By.tagName("button"));
 
-// Selenium's WebDriverWait + ExpectedConditions
-WebElement element = new WebDriverWait(driver, Duration.ofSeconds(10))
-    .until(ExpectedConditions.presenceOfElementLocated(WinBy.name("Ready")));
+// Screenshots
+File screenshot = driver.getScreenshotAs(OutputType.FILE);      // app window
+File desktopShot = driver.getDesktopScreenshot(OutputType.FILE); // entire screen
 
-// Window management (inherited from RemoteWebDriver)
-String handle = driver.getWindowHandle();
-Set<String> handles = driver.getWindowHandles();
-driver.switchTo().window(handle);
-driver.manage().window().maximize();
+// Page source, timeouts, cleanup
+String xml = driver.getPageSource();
+driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5));
+driver.quit();
+```
 
+#### Wait Helpers
+
+| Method | Description |
+|--------|-------------|
+| `waitForElement(By locator)` | Wait for element to exist in UI tree (default 10s) |
+| `waitForElement(By locator, Duration timeout)` | Wait with custom timeout |
+| `waitForClickable(By locator)` | Wait for element to be visible and enabled (default 10s) |
+| `waitForClickable(By locator, Duration timeout)` | Wait for clickable with custom timeout |
+| `waitForWindowCount(int count)` | Wait until N windows are open (default 10s), returns handles |
+| `waitForWindowCount(int count, Duration timeout)` | Wait for window count with custom timeout |
+
+```java
+WebElement el = driver.waitForElement(WinBy.name("Ready"));
+WebElement btn = driver.waitForClickable(WinBy.name("Save"), Duration.ofSeconds(5));
+Set<String> handles = driver.waitForWindowCount(2);
+```
+
+#### Window Management
+
+| Method | Description |
+|--------|-------------|
+| `switchBack()` | Switch to the window you were on before the last `switchTo().window()` call |
+| `switchToWindowByTitle(String titleFragment)` | Find and switch to any window on the system by title (case-sensitive contains match) |
+| `listAllWindows()` | List all visible windows on the system — returns `List<Map>` with `handle`, `title`, `className`, `processId` |
+
+```java
 // Switch to popup, interact, switch back — no need to store the main handle
 driver.switchTo().window(popupHandle).findElement(WinBy.name("OK")).click();
 driver.switchBack();
 
-// Switch to a window by title (searches all system windows, not just current process)
+// Find and switch to a child window from a different process
 driver.switchToWindowByTitle("POS_PREPROD");
 
-// List all visible windows on the system (handle, title, className, processId)
+// Discover all windows (useful when getWindowHandles() doesn't return child windows)
 List<Map<String, Object>> windows = driver.listAllWindows();
+windows.forEach(w -> System.out.println(w.get("title") + " → " + w.get("handle")));
+```
 
-// Wait helpers (default 10s timeout, or provide custom Duration)
-WebElement el = driver.waitForElement(WinBy.name("Ready"));
-WebElement btn = driver.waitForClickable(WinBy.name("Save"), Duration.ofSeconds(5));
-Set<String> handles = driver.waitForWindowCount(2);
+#### Element Lookup Helpers
 
-// Send keys to focused element (no element reference needed)
-driver.sendKeys(Keys.chord(Keys.CONTROL, "o")); // Ctrl+O
+| Method | Description |
+|--------|-------------|
+| `findElementByIndex(By locator, int index)` | Find the Nth element matching a locator (0-based). Useful for VB6 controls without unique names. |
+| `findElementByPosition(By locator, int row, int col)` | Find element by visual grid position. Groups elements by Y coordinate (±20px), sorts by X within each row. |
+| `findElementByPosition(By locator, int row, int col, int tolerance)` | Same with custom Y-tolerance (default 20px, increase for high-DPI). |
+| `findChildren(WebElement parent)` | Get all direct children of an element. Works with UIA and Win32/VB6 (MSAA). |
+| `findChildren(WebElement parent, int index)` | Get the Nth direct child (0-based). |
 
-// Find element by index (useful for VB6 controls without unique identifiers)
-WebElement thirdButton = driver.findElementByIndex(WinBy.className("Button"), 2);
+```java
+// VB6 form with 10 identical TextBox controls — get the 3rd one
+WebElement field = driver.findElementByIndex(WinBy.className("ThunderRT6TextBox"), 2);
 
-// Find element by visual grid position (row, col — groups by Y, sorts by X)
+// Grid-like layout — find element at row 1, column 3
 WebElement cell = driver.findElementByPosition(WinBy.className("ThunderRT6TextBox"), 1, 3);
 
-// Get direct children of an element (works with UIA and Win32/VB6)
-List<WebElement> children = driver.findChildren(parentElement);
-WebElement firstChild = driver.findChildren(parentElement, 0);
+// Enumerate children of a container
+List<WebElement> children = driver.findChildren(panel);
+WebElement firstChild = driver.findChildren(panel, 0);
+```
 
-// Retry flaky interactions
+#### Input & Retry
+
+| Method | Description |
+|--------|-------------|
+| `sendKeys(CharSequence... keys)` | Send keys to the active/focused element without needing an element reference. |
+| `retry(Runnable action, int maxAttempts, Duration delay)` | Retry an action up to N times with delay between attempts. Throws after all fail. |
+
+```java
+// Keyboard shortcuts without finding an element first
+driver.sendKeys(Keys.chord(Keys.CONTROL, "o")); // Ctrl+O
+driver.sendKeys(Keys.ENTER);
+
+// Retry a flaky VB6 click
 driver.retry(() -> driver.findElement(WinBy.name("Save")).click(), 3, Duration.ofMillis(500));
-
-// Screenshots (Selenium standard — captures app window)
-File screenshot = driver.getScreenshotAs(OutputType.FILE);
-
-// Desktop screenshot (captures entire screen — useful for dialogs/popups outside the app)
-File desktopShot = driver.getDesktopScreenshot(OutputType.FILE);
-
-// Page source (UI tree as XML)
-String xml = driver.getPageSource();
-
-// Timeouts
-driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5));
-
-// Cleanup (auto-stops the server)
-driver.quit();
 ```
 
 ### WebElement (standard Selenium)
