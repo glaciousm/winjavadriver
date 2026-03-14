@@ -143,6 +143,23 @@ public class WinJavaDriver extends RemoteWebDriver {
     }
 
     // =============================================
+    // Desktop Screenshot (WinJavaDriver Extension)
+    // =============================================
+
+    /**
+     * Take a screenshot of the entire desktop, not just the application window.
+     * Useful when dialogs, popups, or other windows are visible outside the app.
+     *
+     * @param outputType The desired output type (BASE64, BYTES, or FILE)
+     * @param <T> The type determined by the OutputType
+     * @return The screenshot in the requested format
+     */
+    public <T> T getDesktopScreenshot(org.openqa.selenium.OutputType<T> outputType) {
+        String base64 = (String) execute(WinJavaDriverCommandExecutor.WIN_DESKTOP_SCREENSHOT).getValue();
+        return outputType.convertFromBase64Png(base64);
+    }
+
+    // =============================================
     // MSFlexGrid Support (WinJavaDriver Extensions)
     // =============================================
 

@@ -22,6 +22,9 @@ class WinJavaDriverCommandExecutor extends DriverCommandExecutor {
     static final String WIN_FIND_ELEMENT = "winjavadriver:findElement";
     static final String WIN_FIND_ELEMENTS = "winjavadriver:findElements";
 
+    // Desktop screenshot command
+    static final String WIN_DESKTOP_SCREENSHOT = "winjavadriver:desktopScreenshot";
+
     // MSFlexGrid extension commands
     static final String WIN_GRID_CELL = "winjavadriver:gridCell";
     static final String WIN_GRID_GET_VALUE = "winjavadriver:gridGetValue";
@@ -41,6 +44,10 @@ class WinJavaDriverCommandExecutor extends DriverCommandExecutor {
                 new CommandInfo("/session/:sessionId/element", HttpMethod.POST));
         defineCommand(WIN_FIND_ELEMENTS,
                 new CommandInfo("/session/:sessionId/elements", HttpMethod.POST));
+
+        // Desktop screenshot command
+        defineCommand(WIN_DESKTOP_SCREENSHOT,
+                new CommandInfo("/session/:sessionId/winjavadriver/screenshot/desktop", HttpMethod.GET));
 
         // MSFlexGrid extension commands
         defineCommand(WIN_GRID_CELL,
@@ -67,6 +74,10 @@ class WinJavaDriverCommandExecutor extends DriverCommandExecutor {
                     new CommandInfo("/session/:sessionId/element", HttpMethod.POST));
             defineCommand(WIN_FIND_ELEMENTS,
                     new CommandInfo("/session/:sessionId/elements", HttpMethod.POST));
+
+            // Desktop screenshot command
+            defineCommand(WIN_DESKTOP_SCREENSHOT,
+                    new CommandInfo("/session/:sessionId/winjavadriver/screenshot/desktop", HttpMethod.GET));
 
             // MSFlexGrid extension commands
             defineCommand(WIN_GRID_CELL,
