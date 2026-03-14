@@ -1,10 +1,5 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { execSync } from "node:child_process";
-import { writeFileSync, unlinkSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
-import { randomBytes } from "node:crypto";
 import type { DriverManager } from "../driver-manager.js";
 import type { WebDriverClient } from "../webdriver-client.js";
 
@@ -79,70 +74,26 @@ export function registerPropertyTools(
     async ({ elementId, fullscreen }) => {
       try {
         if (fullscreen) {
-          // Use PowerShell with Win32 BitBlt for robust screen capture
-          // (CopyFromScreen can fail with "handle is invalid" after window switches)
-          const psScript = `
-Add-Type @"
-using System;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.Runtime.InteropServices;
-public class ScreenCapture {
-    [DllImport("user32.dll")] static extern IntPtr GetDesktopWindow();
-    [DllImport("user32.dll")] static extern IntPtr GetWindowDC(IntPtr hWnd);
-    [DllImport("user32.dll")] static extern int ReleaseDC(IntPtr hWnd, IntPtr hDC);
-    [DllImport("gdi32.dll")] static extern IntPtr CreateCompatibleDC(IntPtr hdc);
-    [DllImport("gdi32.dll")] static extern IntPtr CreateCompatibleBitmap(IntPtr hdc, int w, int h);
-    [DllImport("gdi32.dll")] static extern IntPtr SelectObject(IntPtr hdc, IntPtr obj);
-    [DllImport("gdi32.dll")] static extern bool BitBlt(IntPtr hdcDest, int x1, int y1, int w, int h, IntPtr hdcSrc, int x2, int y2, uint rop);
-    [DllImport("gdi32.dll")] static extern bool DeleteDC(IntPtr hdc);
-    [DllImport("gdi32.dll")] static extern bool DeleteObject(IntPtr obj);
-    [DllImport("user32.dll")] static extern int GetSystemMetrics(int nIndex);
-    const uint SRCCOPY = 0x00CC0020;
-    public static string Capture() {
-        int w = GetSystemMetrics(0); // SM_CXSCREEN
-        int h = GetSystemMetrics(1); // SM_CYSCREEN
-        IntPtr desktop = GetDesktopWindow();
-        IntPtr hdc = GetWindowDC(desktop);
-        IntPtr memDC = CreateCompatibleDC(hdc);
-        IntPtr hBmp = CreateCompatibleBitmap(hdc, w, h);
-        IntPtr old = SelectObject(memDC, hBmp);
-        BitBlt(memDC, 0, 0, w, h, hdc, 0, 0, SRCCOPY);
-        SelectObject(memDC, old);
-        Bitmap bmp = Bitmap.FromHbitmap(hBmp);
-        var ms = new System.IO.MemoryStream();
-        bmp.Save(ms, ImageFormat.Png);
-        string result = Convert.ToBase64String(ms.ToArray());
-        ms.Dispose(); bmp.Dispose();
-        DeleteObject(hBmp); DeleteDC(memDC);
-        ReleaseDC(desktop, hdc);
-        return result;
-    }
-}
-"@
-[ScreenCapture]::Capture()
-`;
-          const scriptPath = join(tmpdir(), `wjd-screenshot-${randomBytes(8).toString("hex")}.ps1`);
-          writeFileSync(scriptPath, psScript);
-          try {
-            const base64 = execSync(`powershell -NoProfile -ExecutionPolicy Bypass -File "${scriptPath}"`, {
-              encoding: "utf8",
-              maxBuffer: 50 * 1024 * 1024,
-              timeout: 10000,
-            }).trim();
-            return {
-              content: [{
-                type: "image" as const,
-                data: base64,
-                mimeType: "image/png",
-              }],
-            };
-          } finally {
-            try { unlinkSync(scriptPath); } catch { /* ignore */ }
+          // Use the server's desktop screenshot endpoint (Win32 BitBlt capture)
+          // This is more reliable than the old PowerShell approach which could
+          // return empty results depending on the execution context
+          const base64 = await client.takeDesktopScreenshot();
+          if (!base64) {
+            return { content: [{ type: "text", text: "Desktop screenshot returned empty — the server may not have access to the interactive desktop." }], isError: true };
           }
+          return {
+            content: [{
+              type: "image" as const,
+              data: base64,
+              mimeType: "image/png",
+            }],
+          };
         }
 
         const base64 = await client.takeScreenshot(elementId ?? undefined);
+        if (!base64) {
+          return { content: [{ type: "text", text: "Screenshot returned empty data from server." }], isError: true };
+        }
         return {
           content: [{
             type: "image" as const,

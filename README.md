@@ -18,6 +18,7 @@ A Windows desktop automation tool that implements the W3C WebDriver protocol. Au
 - **MCP Server** — AI-driven desktop automation with smart, token-efficient tools
 - **Multiple Locator Strategies** — name, accessibilityId, className, tagName, xpath
 - **Name Normalization** — `WinBy.name("Open")` automatically matches both `"Open"` and `"&Open"` (Windows accelerator key prefix)
+- **Window Chaining** — `switchTo().window(handle)` tracks previous window, `switchBack()` returns to it
 - **Screenshots** — Window, element, and full desktop screenshot capture (z-order independent)
 - **Selenium Grid 4 Integration** — Run tests on remote Windows machines via Grid relay
 - **Cucumber/BDD Ready** — Example projects for Calculator automation
@@ -192,6 +193,10 @@ String handle = driver.getWindowHandle();
 Set<String> handles = driver.getWindowHandles();
 driver.switchTo().window(handle);
 driver.manage().window().maximize();
+
+// Switch to popup, interact, switch back — no need to store the main handle
+driver.switchTo().window(popupHandle).findElement(WinBy.name("OK")).click();
+driver.switchBack();
 
 // Screenshots (Selenium standard — captures app window)
 File screenshot = driver.getScreenshotAs(OutputType.FILE);

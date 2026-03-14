@@ -32,6 +32,8 @@ import java.util.Map;
  */
 public class WinJavaDriver extends RemoteWebDriver {
 
+    private String previousWindowHandle;
+
     /**
      * Create a new driver with default options.
      * Auto-discovers and starts winjavadriver.exe.
@@ -140,6 +142,74 @@ public class WinJavaDriver extends RemoteWebDriver {
      */
     public WebDriverWait newWait(Duration timeout) {
         return new WebDriverWait(this, timeout);
+    }
+
+    // =============================================
+    // Window Switching (WinJavaDriver Extension)
+    // =============================================
+
+    @Override
+    public TargetLocator switchTo() {
+        return new WinTargetLocator(super.switchTo());
+    }
+
+    /**
+     * Switch back to the previous window.
+     * Remembers the window handle from before the last {@code switchTo().window()} call.
+     *
+     * <p>Usage:
+     * <pre>
+     * driver.switchTo().window(popupHandle).findElement(WinBy.name("OK")).click();
+     * driver.switchBack();
+     * </pre>
+     *
+     * @return this driver for chaining
+     * @throws org.openqa.selenium.NoSuchWindowException if no previous window to switch to
+     */
+    public WinJavaDriver switchBack() {
+        if (previousWindowHandle == null) {
+            throw new org.openqa.selenium.NoSuchWindowException("No previous window to switch back to");
+        }
+        String handle = previousWindowHandle;
+        previousWindowHandle = null;
+        // Use super.switchTo() to bypass tracking — switchBack shouldn't record a new previous
+        super.switchTo().window(handle);
+        return this;
+    }
+
+    private class WinTargetLocator implements TargetLocator {
+        private final TargetLocator delegate;
+
+        WinTargetLocator(TargetLocator delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public org.openqa.selenium.WebDriver window(String nameOrHandle) {
+            try {
+                previousWindowHandle = getWindowHandle();
+            } catch (Exception ignored) {
+                // Window may already be closed
+            }
+            return delegate.window(nameOrHandle);
+        }
+
+        @Override
+        public org.openqa.selenium.WebDriver frame(int index) { return delegate.frame(index); }
+        @Override
+        public org.openqa.selenium.WebDriver frame(String nameOrId) { return delegate.frame(nameOrId); }
+        @Override
+        public org.openqa.selenium.WebDriver frame(WebElement frameElement) { return delegate.frame(frameElement); }
+        @Override
+        public org.openqa.selenium.WebDriver parentFrame() { return delegate.parentFrame(); }
+        @Override
+        public org.openqa.selenium.WebDriver defaultContent() { return delegate.defaultContent(); }
+        @Override
+        public WebElement activeElement() { return delegate.activeElement(); }
+        @Override
+        public org.openqa.selenium.Alert alert() { return delegate.alert(); }
+        @Override
+        public org.openqa.selenium.WebDriver newWindow(org.openqa.selenium.WindowType typeHint) { return delegate.newWindow(typeHint); }
     }
 
     // =============================================

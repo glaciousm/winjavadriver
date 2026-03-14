@@ -173,6 +173,11 @@ export class WebDriverClient {
     return this.request<string>("GET", path);
   }
 
+  async takeDesktopScreenshot(): Promise<string> {
+    const sid = this.resolveSessionId();
+    return this.request<string>("GET", `/session/${sid}/winjavadriver/screenshot/desktop`);
+  }
+
   // --- Window Management ---
 
   async getPageSource(): Promise<string> {
