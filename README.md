@@ -1,5 +1,8 @@
 # WinJavaDriver
 
+<img width="1983" height="793" alt="09_29_11 AM" src="https://github.com/user-attachments/assets/ada6ba09-9eeb-44bf-ae6e-71657ccbc79d" />
+
+
 [![CI](https://github.com/glaciousm/winjavadriver/actions/workflows/ci.yml/badge.svg)](https://github.com/glaciousm/winjavadriver/actions/workflows/ci.yml)
 
 A Windows desktop automation tool that implements the W3C WebDriver protocol. Automate Windows applications from Java using a familiar Selenium-style API — like ChromeDriver, but for Windows desktop apps.
