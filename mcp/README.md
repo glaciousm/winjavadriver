@@ -78,7 +78,7 @@ These tools compose multiple WebDriver calls into single, token-efficient operat
 | `win_form_fields` | Discover form fields (Edit, ComboBox, CheckBox) with current values |
 | `win_menu` | Navigate menu path by clicking items in sequence (e.g., File > Save As) |
 | `win_select_option` | Select option from ComboBox/ListBox — expands, finds, clicks |
-| `win_grid_edit` | Batch-edit multiple MSFlexGrid cells in one call |
+| `win_grid_edit` | Batch-edit multiple MSFlexGrid cells in one call. Addresses cells by row/column index rather than screen position, so off-screen rows work and behaviour is unaffected by resolution or display scaling. Only the grid's editable column can be written — pass `editableColumn` (default `1`) if that is not column 1 |
 
 ### Recommended AI Agent Workflow
 

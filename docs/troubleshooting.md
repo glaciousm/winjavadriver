@@ -58,31 +58,40 @@ Some MSAA elements return bounding rectangles equal to the entire window size in
 
 MSFlexGrid is exposed as a single element — individual cells are **not** accessible as child elements. The server provides custom grid endpoints for cell-level access.
 
-### Navigation Pattern
+### Use the Grid Endpoints, Not Coordinates
+
+Address cells by row and column index. The server moves the grid's selection by logical row/column steps, so cells outside the visible area are reached correctly and results do not depend on screen resolution or display scaling:
 
 ```java
-// Navigate to top of grid
-new Actions(driver).sendKeys(Keys.PAGE_UP).perform();
+WinJavaDriver driver = ...;
+WebElement grid = driver.findElement(WinBy.className("MSFlexGridWndClass"));
 
-// Move down to specific row
-for (int i = 0; i < targetRow; i++) {
-    new Actions(driver).sendKeys(Keys.DOWN).perform();
-}
+// Read a cell (0-based row/col, excluding the header row)
+String value = driver.getGridCellValue(grid, 32, 1);
 
-// Commit cell edit
-new Actions(driver).sendKeys(Keys.ENTER).perform();
+// Write a cell
+driver.setGridCellValue(grid, 32, 1, "new value");
 ```
 
-### Dynamic Edit Field
+Off-screen rows need no scrolling on your part — the grid scrolls its own selection into view.
 
-When a cell is selected, a floating edit field appears (AutomationId `"22"`). This is where you read/write cell values:
+**Do not compute cell positions and click them.** A grid's row height, header height and column widths vary per application, and the driver is per-monitor DPI aware while VB6 hosts are DPI unaware — so a coordinate that works on one machine selects a different cell on another.
+
+### Only the Editable Column Can Be Read or Written
+
+Cell text is read from and written through the grid's *editor* (the floating edit field, control ID `22` in most applications). That editor only ever holds the **editable** column's value, so other columns — for example a field-name label in column 0 — cannot be read or written this way.
+
+Requesting a different column fails with a clear error rather than silently returning the editable column's value. If your grid's editable column is not column 1, declare it:
 
 ```java
-// Click grid to select cell, then find the edit field
-WebElement editField = driver.findElement(WinBy.accessibilityId("22"));
-editField.clear();
-editField.sendKeys("new value");
+// This grid's editor edits column 2
+String value = driver.getGridCellValue(grid, 5, 2, 22, 2);
+driver.setGridCellValue(grid, 5, 2, "new value", 22, 2);
 ```
+
+### Grid Information
+
+`win_grid_info` (or the `/grid/{id}/info` endpoint) reports `rowCountHint`, derived from the grid's scroll range. It is `null` when the grid has no scrollbar because every row fits. `columnCount` is always `null` — a self-drawing grid exposes no column count to an external process.
 
 ### Status Bar Shows Current Cell Value
 
@@ -96,20 +105,6 @@ String cellValue = statusBar.getText();
 ### Field Numbers Skip
 
 VB6 grid field numbers are non-sequential (e.g., F21, F27, F29 — gaps exist). Row number does not equal field number. Use the grid endpoints with 0-based row/col indices instead.
-
-### Grid Endpoints (Java Client)
-
-```java
-// Using custom grid endpoints (0-based row/col)
-WinJavaDriver driver = ...;
-WebElement grid = driver.findElement(WinBy.className("MSFlexGridWndClass"));
-
-// Read cell value
-String value = driver.getGridCellValue(grid, 2, 1); // row 2, col 1
-
-// Write cell value
-driver.setGridCellValue(grid, 2, 1, "new value");
-```
 
 ## File Dialogs
 

@@ -21,10 +21,11 @@ export function registerGridTools(
       col: z.number().describe("Column index (0-based). Usually 1 for the 'Content' column"),
       fieldName: z.string().optional().describe("Optional display name for the cell (e.g., 'F02_PAN')"),
       editFieldId: z.number().optional().describe("Control ID of the dynamic edit field (default: 22)"),
+      editableColumn: z.number().optional().describe("The only column this grid's editor can read or write (default: 1). Text operations on other columns are rejected rather than silently using this column"),
     },
-    async ({ gridElementId, row, col, fieldName, editFieldId }) => {
+    async ({ gridElementId, row, col, fieldName, editFieldId, editableColumn }) => {
       try {
-        const cellElementId = await client.getGridCell(gridElementId, row, col, fieldName, editFieldId);
+        const cellElementId = await client.getGridCell(gridElementId, row, col, fieldName, editFieldId, editableColumn);
         return {
           content: [{
             type: "text",
@@ -45,16 +46,17 @@ export function registerGridTools(
 
   server.tool(
     "win_grid_get_value",
-    "Get the value of an MSFlexGrid cell. Clicks the cell and reads from the dynamic edit field.",
+    "Get the value of an MSFlexGrid cell. Moves the grid selection by row/column steps (no screen coordinates, so it works at any resolution) and reads the grid editor. Only the editable column can be read.",
     {
       gridElementId: z.string().describe("Element ID of the MSFlexGrid"),
       row: z.number().describe("Row index (0-based, excluding header)"),
-      col: z.number().describe("Column index (0-based)"),
+      col: z.number().describe("Column index (0-based); must be the editable column"),
       editFieldId: z.number().optional().describe("Control ID of the dynamic edit field (default: 22)"),
+      editableColumn: z.number().optional().describe("The only column this grid's editor can read (default: 1). Other columns are rejected rather than silently returning this column's value"),
     },
-    async ({ gridElementId, row, col, editFieldId }) => {
+    async ({ gridElementId, row, col, editFieldId, editableColumn }) => {
       try {
-        const value = await client.getGridCellValue(gridElementId, row, col, editFieldId);
+        const value = await client.getGridCellValue(gridElementId, row, col, editFieldId, editableColumn);
         return {
           content: [{
             type: "text",
@@ -70,17 +72,18 @@ export function registerGridTools(
 
   server.tool(
     "win_grid_set_value",
-    "Set the value of an MSFlexGrid cell. Clicks the cell and types into the dynamic edit field.",
+    "Set the value of an MSFlexGrid cell. Moves the grid selection by row/column steps (no screen coordinates, so it works at any resolution) and types into the grid editor. Only the editable column can be written.",
     {
       gridElementId: z.string().describe("Element ID of the MSFlexGrid"),
       row: z.number().describe("Row index (0-based, excluding header)"),
       col: z.number().describe("Column index (0-based)"),
       value: z.string().describe("Value to set in the cell"),
       editFieldId: z.number().optional().describe("Control ID of the dynamic edit field (default: 22)"),
+      editableColumn: z.number().optional().describe("The only column this grid's editor can write (default: 1). Other columns are rejected rather than writing to the wrong cell"),
     },
-    async ({ gridElementId, row, col, value, editFieldId }) => {
+    async ({ gridElementId, row, col, value, editFieldId, editableColumn }) => {
       try {
-        await client.setGridCellValue(gridElementId, row, col, value, editFieldId);
+        await client.setGridCellValue(gridElementId, row, col, value, editFieldId, editableColumn);
         return {
           content: [{
             type: "text",

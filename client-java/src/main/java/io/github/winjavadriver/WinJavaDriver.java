@@ -375,7 +375,7 @@ public class WinJavaDriver extends RemoteWebDriver {
      * @return A WebElement representing the grid cell
      */
     public WebElement getGridCell(WebElement gridElement, int row, int col) {
-        return getGridCell(gridElement, row, col, "", 22);
+        return getGridCell(gridElement, row, col, "", DEFAULT_GRID_EDIT_FIELD_ID);
     }
 
     /**
@@ -388,29 +388,68 @@ public class WinJavaDriver extends RemoteWebDriver {
      * @param editFieldId Control ID of the dynamic edit field (default: 22)
      * @return A WebElement representing the grid cell
      */
-    public WebElement getGridCell(WebElement gridElement, int row, int col, String fieldName, int editFieldId) {
+    public WebElement getGridCell(
+            WebElement gridElement, int row, int col, String fieldName, int editFieldId) {
+        return getGridCell(gridElement, row, col, fieldName, editFieldId,
+                DEFAULT_GRID_EDITABLE_COLUMN);
+    }
+
+    /**
+     * Create a virtual element for a grid cell, declaring which column the grid's editor reaches.
+     *
+     * <p>Reading or writing text through the returned element uses the grid's editor, so
+     * {@code getText}, {@code sendKeys} and {@code clear} only work when {@code col} is the
+     * editable column. {@code click} works for any column, since selecting a cell does not
+     * involve the editor.
+     *
+     * @param gridElement The MSFlexGrid element
+     * @param row Row index (0-based, excluding header)
+     * @param col Column index (0-based)
+     * @param fieldName Optional display name for the cell
+     * @param editFieldId Control ID of the dynamic edit field (default: 22)
+     * @param editableColumn The only column this grid's editor can read or write
+     * @return A WebElement representing the grid cell
+     */
+    public WebElement getGridCell(
+            WebElement gridElement, int row, int col, String fieldName, int editFieldId,
+            int editableColumn) {
         String elementId = ((org.openqa.selenium.remote.RemoteWebElement) gridElement).getId();
         Map<String, Object> params = Map.of(
                 "elementId", elementId,
                 "row", row,
                 "col", col,
                 "fieldName", fieldName,
-                "editFieldId", editFieldId
+                "editFieldId", editFieldId,
+                "editableColumn", editableColumn
         );
         return (WebElement) execute(WinJavaDriverCommandExecutor.WIN_GRID_CELL, params).getValue();
     }
 
+    /** The column an MSFlexGrid's editor reaches in most applications. */
+    public static final int DEFAULT_GRID_EDITABLE_COLUMN = 1;
+
+    /** The control ID of the dynamic edit field in most applications. */
+    public static final int DEFAULT_GRID_EDIT_FIELD_ID = 22;
+
     /**
      * Get the value of a grid cell.
-     * This clicks the cell and reads from the dynamic edit field.
+     *
+     * <p>The grid's selection is moved to the cell by row and column steps, so cells outside the
+     * visible area are read correctly and the result does not depend on screen resolution or
+     * display scaling.
+     *
+     * <p>The value is read from the grid's editor, which only ever holds the editable column's
+     * text. Requesting any other column throws rather than returning the editable column's value
+     * — see {@link #getGridCellValue(WebElement, int, int, int, int)} if this grid's editable
+     * column is not {@value #DEFAULT_GRID_EDITABLE_COLUMN}.
      *
      * @param gridElement The MSFlexGrid element
      * @param row Row index (0-based, excluding header)
-     * @param col Column index (0-based)
+     * @param col Column index (0-based); must be the grid's editable column
      * @return The cell value
      */
     public String getGridCellValue(WebElement gridElement, int row, int col) {
-        return getGridCellValue(gridElement, row, col, 22);
+        return getGridCellValue(gridElement, row, col, DEFAULT_GRID_EDIT_FIELD_ID);
     }
 
     /**
@@ -418,32 +457,53 @@ public class WinJavaDriver extends RemoteWebDriver {
      *
      * @param gridElement The MSFlexGrid element
      * @param row Row index (0-based, excluding header)
-     * @param col Column index (0-based)
+     * @param col Column index (0-based); must be the grid's editable column
      * @param editFieldId Control ID of the dynamic edit field
      * @return The cell value
      */
     public String getGridCellValue(WebElement gridElement, int row, int col, int editFieldId) {
+        return getGridCellValue(gridElement, row, col, editFieldId, DEFAULT_GRID_EDITABLE_COLUMN);
+    }
+
+    /**
+     * Get the value of a grid cell, declaring which column the grid's editor reaches.
+     *
+     * @param gridElement The MSFlexGrid element
+     * @param row Row index (0-based, excluding header)
+     * @param col Column index (0-based); must equal {@code editableColumn}
+     * @param editFieldId Control ID of the dynamic edit field
+     * @param editableColumn The only column this grid's editor can read
+     * @return The cell value
+     */
+    public String getGridCellValue(
+            WebElement gridElement, int row, int col, int editFieldId, int editableColumn) {
         String elementId = ((org.openqa.selenium.remote.RemoteWebElement) gridElement).getId();
         Map<String, Object> params = Map.of(
                 "elementId", elementId,
                 "row", row,
                 "col", col,
-                "editFieldId", editFieldId
+                "editFieldId", editFieldId,
+                "editableColumn", editableColumn
         );
         return (String) execute(WinJavaDriverCommandExecutor.WIN_GRID_GET_VALUE, params).getValue();
     }
 
     /**
      * Set the value of a grid cell.
-     * This clicks the cell and types into the dynamic edit field.
+     *
+     * <p>The grid's selection is moved to the cell by row and column steps, so cells outside the
+     * visible area are written correctly regardless of screen resolution or display scaling.
+     *
+     * <p>Writes go through the grid's editor, which only edits the editable column. Requesting
+     * any other column throws rather than writing to the wrong cell.
      *
      * @param gridElement The MSFlexGrid element
      * @param row Row index (0-based, excluding header)
-     * @param col Column index (0-based)
+     * @param col Column index (0-based); must be the grid's editable column
      * @param value The value to set
      */
     public void setGridCellValue(WebElement gridElement, int row, int col, String value) {
-        setGridCellValue(gridElement, row, col, value, 22);
+        setGridCellValue(gridElement, row, col, value, DEFAULT_GRID_EDIT_FIELD_ID);
     }
 
     /**
@@ -451,18 +511,36 @@ public class WinJavaDriver extends RemoteWebDriver {
      *
      * @param gridElement The MSFlexGrid element
      * @param row Row index (0-based, excluding header)
-     * @param col Column index (0-based)
+     * @param col Column index (0-based); must be the grid's editable column
      * @param value The value to set
      * @param editFieldId Control ID of the dynamic edit field
      */
-    public void setGridCellValue(WebElement gridElement, int row, int col, String value, int editFieldId) {
+    public void setGridCellValue(
+            WebElement gridElement, int row, int col, String value, int editFieldId) {
+        setGridCellValue(gridElement, row, col, value, editFieldId, DEFAULT_GRID_EDITABLE_COLUMN);
+    }
+
+    /**
+     * Set the value of a grid cell, declaring which column the grid's editor reaches.
+     *
+     * @param gridElement The MSFlexGrid element
+     * @param row Row index (0-based, excluding header)
+     * @param col Column index (0-based); must equal {@code editableColumn}
+     * @param value The value to set
+     * @param editFieldId Control ID of the dynamic edit field
+     * @param editableColumn The only column this grid's editor can write
+     */
+    public void setGridCellValue(
+            WebElement gridElement, int row, int col, String value, int editFieldId,
+            int editableColumn) {
         String elementId = ((org.openqa.selenium.remote.RemoteWebElement) gridElement).getId();
         Map<String, Object> params = Map.of(
                 "elementId", elementId,
                 "row", row,
                 "col", col,
                 "value", value,
-                "editFieldId", editFieldId
+                "editFieldId", editFieldId,
+                "editableColumn", editableColumn
         );
         execute(WinJavaDriverCommandExecutor.WIN_GRID_SET_VALUE, params);
     }

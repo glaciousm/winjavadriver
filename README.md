@@ -43,7 +43,7 @@ A Windows desktop automation tool that implements the W3C WebDriver protocol. Au
 <dependency>
     <groupId>io.github.glaciousm</groupId>
     <artifactId>winjavadriver-client</artifactId>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
 </dependency>
 ```
 
@@ -397,12 +397,20 @@ WinJavaDriver extends the W3C WebDriver protocol with custom endpoints:
 | GET | `/session/{id}/winjavadriver/windows/all` | List all visible windows on the system |
 | GET | `/session/{id}/winjavadriver/screenshot/desktop` | Full desktop screenshot |
 | POST | `/session/{id}/winjavadriver/grid/{eid}/cell` | Create virtual MSFlexGrid cell element |
-| GET | `/session/{id}/winjavadriver/grid/{eid}/info` | Get grid dimensions and edit field info |
+| GET | `/session/{id}/winjavadriver/grid/{eid}/info` | Get grid row count hint and edit field info |
 | POST | `/session/{id}/winjavadriver/grid/{eid}/cell/value` | Read MSFlexGrid cell value |
 | PUT | `/session/{id}/winjavadriver/grid/{eid}/cell/value` | Write MSFlexGrid cell value |
 
 - Row/col are 0-based (excluding header row)
+- Cells are addressed by index, not by screen position: the server moves the grid's selection by
+  logical row/column steps, so off-screen rows work and behaviour does not change with screen
+  resolution or display scaling
+- Cell text is read and written through the grid's editor, which only reaches the **editable**
+  column. Other columns are rejected with a clear error instead of silently returning that
+  column's value. Pass `editableColumn` (default `1`) when a grid's editable column differs
 - The MCP server exposes this via `win_grid_edit` for batch cell editing
+
+See [docs/troubleshooting.md](docs/troubleshooting.md#msflexgrid-automation) for details and limits.
 
 ## MCP Server (AI Desktop Automation)
 
@@ -645,6 +653,11 @@ WinJavaDriverService service = new WinJavaDriverService.Builder()
     .withVerboseLogging(true)
     .build();
 ```
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for release notes, including breaking changes and known
+limitations per version.
 
 ## Contributing
 

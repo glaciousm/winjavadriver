@@ -955,12 +955,13 @@ export function registerSmartTools(
       }).describe("How to find the grid element"),
       edits: z.array(z.object({
         row: z.number().describe("Row index (0-based, excluding header)"),
-        col: z.number().optional().default(0).describe("Column index (0-based, default: 0)"),
+        col: z.number().optional().describe("Column index (0-based). Defaults to the editable column, since that is the only column a grid editor can write"),
         value: z.string().describe("Value to set in the cell"),
       })).describe("Array of cell edits to perform"),
       editFieldId: z.number().optional().default(22).describe("Control ID of the dynamic edit field (default: 22)"),
+      editableColumn: z.number().optional().default(1).describe("The only column this grid's editor can write (default: 1). Edits to other columns are rejected rather than writing to the wrong cell"),
     },
-    async ({ gridLocator, edits, editFieldId }) => {
+    async ({ gridLocator, edits, editFieldId, editableColumn }) => {
       try {
         await driverManager.ensureRunning();
         const gridId = await client.findElement(gridLocator.using as LocatorStrategy, gridLocator.value);
@@ -968,12 +969,13 @@ export function registerSmartTools(
         const results: string[] = [];
         for (let i = 0; i < edits.length; i++) {
           const edit = edits[i];
+          const col = edit.col ?? editableColumn;
           try {
-            await client.setGridCellValue(gridId, edit.row, edit.col, edit.value, editFieldId);
-            results.push(`[${i + 1}] Row ${edit.row}, Col ${edit.col} = "${edit.value}"`);
+            await client.setGridCellValue(gridId, edit.row, col, edit.value, editFieldId, editableColumn);
+            results.push(`[${i + 1}] Row ${edit.row}, Col ${col} = "${edit.value}"`);
           } catch (err) {
             const msg = err instanceof Error ? err.message : String(err);
-            results.push(`[${i + 1}] FAILED Row ${edit.row}, Col ${edit.col}: ${msg}`);
+            results.push(`[${i + 1}] FAILED Row ${edit.row}, Col ${col}: ${msg}`);
             break;
           }
         }

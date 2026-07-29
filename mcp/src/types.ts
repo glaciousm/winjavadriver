@@ -27,6 +27,23 @@ export interface ElementRect {
   height: number;
 }
 
+/** MSFlexGrid information from win_grid_info */
+export interface GridInfo {
+  className: string;
+  rect: ElementRect;
+  /**
+   * Row count derived from the grid's scroll range, which a grid expresses in rows.
+   * Null when the grid has no scrollbar (all rows fit) or reports no range.
+   */
+  rowCountHint: number | null;
+  /**
+   * Always null: a self-drawing grid exposes no column count to an external process.
+   */
+  columnCount: number | null;
+  dynamicEditFieldId: number | null;
+  editFieldFound: boolean;
+}
+
 /** Comprehensive element info (combo tool result) */
 export interface ElementInfo {
   text: string;

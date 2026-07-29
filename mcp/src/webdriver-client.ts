@@ -6,6 +6,7 @@ import {
   type ElementInfo,
   type ElementInfoExtended,
   type ElementSummary,
+  type GridInfo,
   type LocatorStrategy,
 } from "./types.js";
 
@@ -222,39 +223,48 @@ export class WebDriverClient {
 
   // --- MSFlexGrid Extension ---
 
-  async getGridCell(gridElementId: string, row: number, col: number, fieldName?: string, editFieldId?: number): Promise<string> {
+  /** The column an MSFlexGrid's editor reaches in most applications. */
+  static readonly DEFAULT_GRID_EDITABLE_COLUMN = 1;
+
+  /** The control ID of the dynamic edit field in most applications. */
+  static readonly DEFAULT_GRID_EDIT_FIELD_ID = 22;
+
+  async getGridCell(gridElementId: string, row: number, col: number, fieldName?: string, editFieldId?: number, editableColumn?: number): Promise<string> {
     const sid = this.resolveSessionId();
     const result = await this.request<Record<string, string>>("POST", `/session/${sid}/winjavadriver/grid/${gridElementId}/cell`, {
       row,
       col,
       fieldName: fieldName ?? "",
-      editFieldId: editFieldId ?? 22,
+      editFieldId: editFieldId ?? WebDriverClient.DEFAULT_GRID_EDIT_FIELD_ID,
+      editableColumn: editableColumn ?? WebDriverClient.DEFAULT_GRID_EDITABLE_COLUMN,
     });
     return result[W3C_ELEMENT_ID];
   }
 
-  async getGridCellValue(gridElementId: string, row: number, col: number, editFieldId?: number): Promise<string> {
+  async getGridCellValue(gridElementId: string, row: number, col: number, editFieldId?: number, editableColumn?: number): Promise<string> {
     const sid = this.resolveSessionId();
     return this.request<string>("POST", `/session/${sid}/winjavadriver/grid/${gridElementId}/cell/value`, {
       row,
       col,
-      editFieldId: editFieldId ?? 22,
+      editFieldId: editFieldId ?? WebDriverClient.DEFAULT_GRID_EDIT_FIELD_ID,
+      editableColumn: editableColumn ?? WebDriverClient.DEFAULT_GRID_EDITABLE_COLUMN,
     });
   }
 
-  async setGridCellValue(gridElementId: string, row: number, col: number, value: string, editFieldId?: number): Promise<void> {
+  async setGridCellValue(gridElementId: string, row: number, col: number, value: string, editFieldId?: number, editableColumn?: number): Promise<void> {
     const sid = this.resolveSessionId();
     await this.request("PUT", `/session/${sid}/winjavadriver/grid/${gridElementId}/cell/value`, {
       row,
       col,
       value,
-      editFieldId: editFieldId ?? 22,
+      editFieldId: editFieldId ?? WebDriverClient.DEFAULT_GRID_EDIT_FIELD_ID,
+      editableColumn: editableColumn ?? WebDriverClient.DEFAULT_GRID_EDITABLE_COLUMN,
     });
   }
 
-  async getGridInfo(gridElementId: string): Promise<{ className: string; rect: ElementRect; dynamicEditFieldId: number | null; editFieldFound: boolean }> {
+  async getGridInfo(gridElementId: string): Promise<GridInfo> {
     const sid = this.resolveSessionId();
-    return this.request<{ className: string; rect: ElementRect; dynamicEditFieldId: number | null; editFieldFound: boolean }>("GET", `/session/${sid}/winjavadriver/grid/${gridElementId}/info`);
+    return this.request<GridInfo>("GET", `/session/${sid}/winjavadriver/grid/${gridElementId}/info`);
   }
 
   // --- Keyboard Actions ---
